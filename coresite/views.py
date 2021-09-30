@@ -72,6 +72,13 @@ def anime_detail_view(request, slug):
                 'form': form,
             }
             return render(request, 'anime-details.html', context)
+        except TypeError:
+            context = {
+                'anime': anime,
+                'reviews': Review.objects.filter(anime=anime),
+                'form': form,
+            }
+            return render(request, 'anime-details.html', context)
 
     elif request.method == 'POST':
         if request.user.is_authenticated:
