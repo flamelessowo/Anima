@@ -1,5 +1,4 @@
 from django.core.paginator import Paginator
-from django.http import HttpResponse, Http404
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views.generic import ListView
 from django.core.exceptions import ObjectDoesNotExist
@@ -85,8 +84,9 @@ def anime_detail_view(request, slug):
             anime = get_object_or_404(Anime, slug=slug)
             form = ReviewForm({'user': request.user, 'anime': anime, 'text': request.POST['text']})
             if form.is_valid():
-                form.save()
-                return redirect("Anima:anime", anime.slug)
+                if request.user.is_authenticated:
+                    form.save()
+            return redirect("Anima:anime", anime.slug)
 
 
 def categories_view(request):

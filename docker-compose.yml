@@ -1,0 +1,31 @@
+version: "3.9"
+
+services:
+  redis:
+    image: redis
+    restart: always
+
+  rabbitmq:
+    image: rabbitmq
+    restart: always
+
+  app:
+    restart: always
+    build:
+      context: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/code
+    depends_on:
+      - db
+    command: ["python3", "manage.py", "runserver", "0.0.0.0:8000"]
+
+  db:
+    image: postgres
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=AnimaDB
+      - POSTGRES_USER=grago
+      - POSTGRES_PASSWORD=1910
