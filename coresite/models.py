@@ -2,6 +2,7 @@ import os
 from django.db import models
 from Anima import settings
 from users.models import User
+from django.utils import timezone
 
 ANIME_TYPES = [
     ('TV', 'TV Series'),
@@ -11,7 +12,8 @@ ANIME_TYPES = [
 
 STATUS = [
     ('Airing', 'Airing'),
-    ('Ended', 'Ended')
+    ('Ended', 'Ended'),
+    ('Announced', 'Announced')
 ]
 
 RATINGS = [
@@ -93,6 +95,25 @@ class SubGenre(Genre):
         ordering = ['-title']
 
 
+class Video(models.Model):
+    anime_type = models.CharField(choices=ANIME_TYPES, max_length=15, null=False, blank=True)
+    episode = models.IntegerField(null=False, blank=True, default=1)
+    caption = models.CharField(max_length=240, null=False)
+    quality = models.CharField(choices=QUALITIES, max_length=15, null=False, blank=True)
+
+    def content_file_name(self, filename):
+        ext = filename.split('.')[-1]
+        if not ext == 'mp4':
+            raise Exception("Unsupported format")
+        filename = f"{self.caption}_{self.anime_type}_ep{self.episode}_{self.quality}.{ext}"
+        return os.path.join(f"uploads/{self.caption}/{self.anime_type}", filename)
+
+    video = models.FileField(upload_to=content_file_name)
+
+    def __str__(self):
+        return f"{self.caption} , episode {self.episode}"
+
+
 class Anime(models.Model):
     title = models.CharField(verbose_name='Title', max_length=254, null=False)
     description = models.TextField(verbose_name='Description', max_length=5000, null=False)
@@ -109,6 +130,7 @@ class Anime(models.Model):
     popular = models.BooleanField(default=False)
     image = models.ImageField(verbose_name="Image", upload_to='anime/images', default='f')
     slug = models.SlugField(verbose_name='Slug', default='dummy-anime')
+    date_added = models.DateTimeField(default=timezone.now(), editable=False)
 
     @property
     def get_absolute_image_url(self):
@@ -128,6 +150,14 @@ class Anime(models.Model):
         ordering = ['title', '-rating']
 
 
+class Player(models.Model):
+    anime = models.OneToOneField(Anime, on_delete=models.CASCADE, null=False)
+    videos = models.ManyToManyField(Video)
+
+    def __str__(self):
+        return f"Player - {self.anime.title}"
+
+
 class Banner(models.Model):
     anime = models.ForeignKey(Anime, on_delete=models.CASCADE, null=False)
     description = models.TextField(blank=True)
@@ -137,40 +167,6 @@ class Banner(models.Model):
         return self.anime.title + ' Banner'
 
 
-class Video(models.Model):
-    anime_type = models.CharField(choices=ANIME_TYPES, max_length=15, null=False, blank=True)
-    season = models.IntegerField(null=False, blank=True)
-    episode = models.IntegerField(null=False, blank=True, default=1)
-    caption = models.CharField(max_length=240, null=False)
-    quality = models.CharField(choices=QUALITIES, max_length=15, null=False, blank=True)
-
-    def content_file_name(self, filename):
-        ext = filename.split('.')[-1]
-        if not ext == 'mp4':
-            raise Exception("Unsupported format")
-        filename = f"{self.caption}_{self.season}_{self.anime_type}_ep{self.episode}_{self.quality}.{ext}"
-        if self.anime_type == 'TV':
-            return os.path.join(f"uploads/TV/{self.caption}/season_{self.season}", filename)
-        return os.path.join('uploads', filename)
-
-    video = models.FileField(upload_to=content_file_name)
-
-    def get_video_path(self):
-        return f"uploads/TV/{self.caption}/season_{self.season}"
-
-    def __str__(self):
-        return f"{self.caption}, season {self.season}, episode {self.episode}"
-
-
-class Player(models.Model):
-    anime = models.ForeignKey(Anime, on_delete=models.CASCADE)
-    videos = models.ManyToManyField(Video)
-    season = models.IntegerField(null=False, blank=True)
-
-    def __str__(self):
-        return f"Player: {self.anime}, Season {self.season}"
-
-
 class Review(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     anime = models.ForeignKey(Anime, on_delete=models.CASCADE, default=2)
@@ -178,22 +174,15 @@ class Review(models.Model):
     time = models.DateTimeField(auto_now=True)
 
 
-class AnimeUserStatus(models.Model):
+class AnimeUserFollowed(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     anime = models.ForeignKey(Anime, on_delete=models.CASCADE)
-    graded = models.BooleanField(default=False, verbose_name='Graded')
-    anime_watched = models.BooleanField(default=False, verbose_name='Watched')
-    anime_will_watch = models.BooleanField(default=False, verbose_name='Will Watch')
-    anime_abandoned = models.BooleanField(default=False, verbose_name='Abandoned')
-    anime_loved = models.BooleanField(default=False, verbose_name='Loved')
 
     def __str__(self):
-        return f"{self.user.username if self.user.username else self.user.email} status on {self.anime.title}"
+        return f"{self.user.username if self.user.username else self.user.email} followed {self.anime.title}"
 
     class Meta:
         unique_together = ['user', 'anime']
-
-    # TODO override save() to allow only one true in bool fields
 
 
 class UserAnimeRating(models.Model):

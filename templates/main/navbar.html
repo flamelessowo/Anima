@@ -19,25 +19,29 @@
                                 <li><a href="{% url 'Anima:categories'  %}">Categories <span class="arrow_carrot-down"></span></a>
                                     <ul class="dropdown">
                                         <li><a href="{% url 'Anima:categories'  %}">Categories</a></li>
-                                        {% if not user.is_authenticated %}
-                                        <li><a href="./signup.html">Sign Up</a></li>
-                                        <li><a href="./login.html">Login</a></li>
-                                        {% endif %}
                                     </ul>
-                                </li>
-                                <li><a href="./blog.html">Our Blog</a></li>
-                                <li><a href="#">Contacts</a></li>
+                                    {% if not user.is_authenticated %}
+                                        <li><a href="{% url 'User:login' %}">Login</a></li>
+                                    {% endif %}
+                                    {% if user.is_authenticated %}
+                                        <li><a href="{% url 'User:logout' %}">Logout</a></li>
+                                    {% endif %}
                             </ul>
                         </nav>
                     </div>
                 </div>
                 <div class="col-lg-2">
                     <div class="header__right">
-                        <a href="#" class="search-switch"><span class="icon_search"></span></a>
                         {% if not user.is_authenticated %}
                             <a href="{% url 'User:login' %}"><span class="icon_profile"></span></a>
                         {% else %}
-                            <a href="#"><span class="icon_profile"></span></a>
+                            {% if user.username %}
+                                <span style="color: white; padding-right: 3px">{{ user.username }}</span>
+                                <a href="{% url 'Anima:userpage' username=user.username%}"><span class="icon_profile"></span></a>
+                                {% else %}
+                                <span style="color: white; padding-right: 3px">{{ user.email }}</span>
+                                <a href="{% url 'Anima:userpage' username=user.email%}"><span class="icon_profile"></span></a>
+                            {% endif %}
                         {% endif %}
                     </div>
                 </div>

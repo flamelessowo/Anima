@@ -34,7 +34,7 @@
                     <div class="col-lg-3">
                         <div class="anime__details__pic set-bg" data-setbg={{ anime.image.url }}>
                             <div class="comment"><i class="fa fa-comments"></i> {{ reviews|length }}</div>
-                            <div class="view"><i class="fa fa-eye"></i> 9141</div>
+                            <div class="view"><i class="fa fa-eye"></i> {{ anime.views }}</div>
                         </div>
                     </div>
                     <div class="col-lg-9">
@@ -44,32 +44,31 @@
                             </div>
                             <div class="anime__details__rating">
                                 <div class="rating">
-                                    <a href="#"><i class="fa fa-star"></i></a>
-                                    <a href="#"><i class="fa fa-star"></i></a>
-                                    <a href="#"><i class="fa fa-star"></i></a>
-                                    <a href="#"><i class="fa fa-star"></i></a>
-                                    <a href="#"><i class="fa fa-star-half-o"></i></a>
-                                </div>
-                                <span>1.029 Votes</span>
-                            </div>
-                            {% if status %}
-                            <div class="anime__details__rating2">
-                                <div class="rating">
-                                    {% if user_grage %}
-                                        {% if user_grage.rating %}
-                                            {% for i in '0123456789'|make_list %}
-                                                {% if forloop.counter|add:1 <= user_grage.rating and forloop.counter|add:1|divisibleby:2 %}
-                                                    <a href="#"><i class="fa fa-star"></i></a>
-                                                {% endif %}
-                                            {% endfor %}
-                                        {% endif %}
-                                        {% if not user_grage.rating|divisibleby:2 %}
-                                    <a href="#"><i class="fa fa-star-half-o"></i></a>
-                                        {% endif %}
+                                    {% if not rating %}
+                                    <a href="{% url 'Anima:score' anime.slug 1 %}"><i class="fa fa-star-o"></i></a>
+                                    <a href="{% url 'Anima:score' anime.slug 2 %}"><i class="fa fa-star-o"></i></a>
+                                    <a href="{% url 'Anima:score' anime.slug 3 %}"><i class="fa fa-star-o"></i></a>
+                                    <a href="{% url 'Anima:score' anime.slug 4 %}"><i class="fa fa-star-o"></i></a>
+                                    <a href="{% url 'Anima:score' anime.slug 5 %}"><i class="fa fa-star-o"></i></a>
+                                    <a href="{% url 'Anima:score' anime.slug 6 %}"><i class="fa fa-star-o"></i></a>
+                                    <a href="{% url 'Anima:score' anime.slug 7 %}"><i class="fa fa-star-o"></i></a>
+                                    <a href="{% url 'Anima:score' anime.slug 8 %}"><i class="fa fa-star-o"></i></a>
+                                    <a href="{% url 'Anima:score' anime.slug 9 %}"><i class="fa fa-star-o"></i></a>
+                                    <a href="{% url 'Anima:score' anime.slug 10 %}"><i class="fa fa-star-o"></i></a>
+                                        {% else %}
+                                        {% for i in '0123456789'|make_list %}
+                                            {% if forloop.counter <= rating.rating %}
+                                            <a href="{% url 'Anima:score' anime.slug forloop.counter %}"><i class="fa fa-star"></i></a>
+                                                {% else %}
+                                                <a href="{% url 'Anima:score' anime.slug forloop.counter %}"><i class="fa fa-star-o"></i></a>
+                                            {% endif %}
+                                        {% endfor %}
                                     {% endif %}
                                 </div>
+                                {% if ratings %}
+                                <span>{{ ratings.count }} Votes</span>
+                                {% endif %}
                             </div>
-                            {% endif %}
                             <p>{{ anime.description }}</p>
                             <div class="anime__details__widget">
                                 <div class="row">
@@ -84,19 +83,25 @@
                                     </div>
                                     <div class="col-lg-6 col-md-6">
                                         <ul>
-                                            <li><span>Scores:</span> 7.31 / 1,515</li>
-                                            <li><span>Rating:</span> 8.5 / 161 times</li>
+                                            <li><span>Series:</span> {{ anime.series }}</li>
+                                            <li><span>Rating:</span> {{ anime.rating }} / 10</li>
                                             <li><span>Duration:</span> 24 min/ep</li>
-                                            <li><span>Quality:</span> HD</li>
+                                            <li><span>Quality:</span> 360p+</li>
                                             <li><span>Views:</span> {{ anime.views }}</li>
                                         </ul>
                                     </div>
                                 </div>
                             </div>
                             <div class="anime__details__btn">
-                                <a href="#" class="follow-btn"><i class="fa fa-heart-o"></i> Follow</a>
-                                <a href="#" class="watch-btn"><span>Watch Now</span> <i
+                                {% if not followed %}
+                                <a href="{% url 'Anima:follow' anime.slug %}" class="follow-btn"><i class="fa fa-heart-o"></i> Follow</a>
+                                    {% else %}
+                                    <a href="{% url 'Anima:follow' anime.slug %}" class="follow-btn"><i class="fa fa-heart"></i> Followed</a>
+                                {% endif %}
+                                {% if anime.player %}
+                                <a href="{% url 'Anima:player' anime.slug  1%}" class="watch-btn"><span>Watch Now</span> <i
                                     class="fa fa-angle-right"></i></a>
+                                {% endif %}
                                 </div>
                             </div>
                         </div>
@@ -112,12 +117,16 @@
                             {% for review in reviews %}
                             <div class="anime__review__item">
                                 <div class="anime__review__item__pic">
+                                    {% if review.user.image %}
                                     <img src="{{ review.user.image.url }}" alt="">
+                                        {% else %}
+                                        <img src="/media/default-user-image.png" alt="">
+                                    {% endif %}
                                 </div>
                                 <div class="anime__review__item__text">
                                     <h6>{% if review.user.username %}
-                                        {{ review.user.username }} {% else %}
-                                        {{ review.user.email }}
+                                        <a href="{% url 'Anima:userpage' username=review.user.username%}">{{ review.user.username }}</a> {% else %}
+                                        <a href="{% url 'Anima:userpage' username=review.user.email%}">{{ review.user.email }}</a>
                                     {% endif %}<span>
                                         {{review.time}}</span></h6>
                                     <p>{{ review.text}}</p>
@@ -144,26 +153,13 @@
                             <div class="section-title">
                                 <h5>you might like...</h5>
                             </div>
-                            <div class="product__sidebar__view__item set-bg" data-setbg="img/sidebar/tv-1.jpg">
-                                <div class="ep">18 / ?</div>
-                                <div class="view"><i class="fa fa-eye"></i> 9141</div>
-                                <h5><a href="#">Boruto: Naruto next generations</a></h5>
-                            </div>
-                            <div class="product__sidebar__view__item set-bg" data-setbg="img/sidebar/tv-2.jpg">
-                                <div class="ep">18 / ?</div>
-                                <div class="view"><i class="fa fa-eye"></i> 9141</div>
-                                <h5><a href="#">The Seven Deadly Sins: Wrath of the Gods</a></h5>
-                            </div>
-                            <div class="product__sidebar__view__item set-bg" data-setbg="img/sidebar/tv-3.jpg">
-                                <div class="ep">18 / ?</div>
-                                <div class="view"><i class="fa fa-eye"></i> 9141</div>
-                                <h5><a href="#">Sword art online alicization war of underworld</a></h5>
-                            </div>
-                            <div class="product__sidebar__view__item set-bg" data-setbg="img/sidebar/tv-4.jpg">
-                                <div class="ep">18 / ?</div>
-                                <div class="view"><i class="fa fa-eye"></i> 9141</div>
-                                <h5><a href="#">Fate/stay night: Heaven's Feel I. presage flower</a></h5>
-                            </div>
+                            {% for anim in animes|slice:3 %}
+                                <div class="product__sidebar__view__item set-bg" data-setbg="{{ anim.image.url }}">
+                                    <div class="ep">{{ anim.date_aired|date:"M , Y" }}</div>
+                                    <div class="view"><i class="fa fa-eye"></i> {{ anim.views }}</div>
+                                    <h5><a href="{% url 'Anima:anime' anim.slug %}">{{ anim.title }}</a></h5>
+                                </div>
+                            {% endfor %}
                         </div>
                     </div>
                 </div>

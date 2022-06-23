@@ -56,10 +56,10 @@ class User(AbstractBaseUser):
     staff = models.BooleanField(default=False)
     admin = models.BooleanField(default=False)
     about = models.TextField(blank=True, null=True, max_length=5000)
-    birth_date = models.DateField(verbose_name='Date of birth:', null=True)
+    birth_date = models.DateField(verbose_name='Date of birth:', null=True, blank=True)
     city = models.CharField(verbose_name='City', max_length=255, null=True, blank=True)
     gender = models.CharField(max_length=10, choices=GENDER_CHOICES, null=True, blank=True)
-    image = models.ImageField(verbose_name='Image', upload_to='users/images', null=True)
+    image = models.ImageField(verbose_name='Image', upload_to='users/images', null=True, blank=True)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []

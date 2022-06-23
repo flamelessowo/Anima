@@ -1,0 +1,98 @@
+{% extends 'main/base.html' %}
+{% block content %}
+<body>
+    <main class="container-user">
+        <div class="profile">
+            <div class="data_container">
+                    {% if can_edit %}
+                        {% if current_user.username %}
+                            <i><a href="{% url 'Anima:user_edit' current_user.username  %}" style="color: white" class="icon_pencil-edit"></a></i>
+                            {% else %}
+                            <i><a href="{% url 'Anima:user_edit' current_user.email  %}" style="color: white" class="icon_pencil-edit"></a></i>
+                        {% endif %}
+                    {% endif %}
+        <div class="avatar">
+            {% if current_user.image %}
+            <img src="{{ current_user.image.url }}" alt="">
+                {% else %}
+                 <img src="/media/default-user-image.png" alt="">
+            {% endif %}
+            <div class="name">
+                {% if current_user.username %}
+                <span>{{ current_user.username }}</span>
+                {% else %}
+                    <span>good person #1</span>
+                {% endif %}
+            </div>
+            <div class="line"></div>
+        </div>
+        <div class="contact_info">
+            <label class="label_default" for="email">Email:</label>
+            <div class="name email">
+                <span id="email">{{ current_user.email }}</span>
+            </div>
+            <label class="label_default" for="admin">Gender:</label>
+            <div class="name admin">
+                {% if current_user.gender %}
+                <span id="admin">{{ current_user.gender }}</span>
+                    {% else %}
+                    <span id="admin">unknown gender</span>
+                {% endif %}
+            </div>
+            <label class="label_default" for="birth_date">Birth date:</label>
+            <div class="name birth_date">
+                <span id="birth_date">{{ current_user.birth_date }}</span>
+            </div>
+            <label class="label_default" for="city">Location:</label>
+            <div class="name city">
+                {% if current_user.city %}
+                <label for="city">{{ current_user.city }}</label>
+                <span id="city"></span>
+                    {% else %}
+                    <label for="city">Mystic town...</label>
+                    <span id="city"></span>
+                {% endif %}
+            </div>
+            <label class="label_default" for="gender">About:</label>
+            <div class="name gender">
+                {% if current_user.about %}
+                <span id="gender">{{ current_user.about }}</span>
+                    {% else %}
+                    We don't know much about him, but we sure he is a good person.
+                {% endif %}
+            </div>
+        </div>
+    </div>
+        <div class="lists">
+            <div class="lists_buttons">
+                <span class="lists_buttons_item">Followed Animes</span>
+            </div>
+            <div class="lists_table">
+                <table class="lists_table_gleiph ui celled table table_fx">
+                    <thead>
+                        <tr>
+                            <th>№</th>
+                            <th>Name</th>
+                            <th>Studio</th>
+                            <th>Rating</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if followed %}
+                            {% for fol in followed %}
+                        <tr>
+                          <td data-label="Id">{{ forloop.counter }}</td>
+                          <td data-label="Name"><a href="{% url 'Anima:anime' fol.anime.slug %}">{{ fol.anime.title }}</a></td>
+                            <td data-label="Studio">{{ fol.anime.studio }}</td>
+                          <td data-label="Rating">{{ fol.anime.rating }}</td>
+                        </tr>
+                            {% endfor %}
+                        {% endif %}
+                      </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    </main>
+</body>
+{% endblock content %}

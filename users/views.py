@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
 from .forms import LoginForm, SignUpForm
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.urls import reverse
 
 
@@ -31,9 +31,13 @@ def signup_view(request):
         form = SignUpForm(request.POST)
         if form.is_valid():
             form.save()
-            return HttpResponseRedirect(reverse('Anima:index'))
-        print(form.errors)
+            return HttpResponseRedirect(reverse('User:login'))
 
     else:
         form = SignUpForm()
     return render(request, 'signup.html', {'form': form})
+
+
+def logout_view(request):
+    logout(request)
+    return HttpResponseRedirect(reverse('Anima:index'))

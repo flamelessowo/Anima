@@ -1,0 +1,60 @@
+{% extends 'main/base.html' %}
+{% load static %}
+{% block override %}
+    <link rel="stylesheet" href="{% static 'css/user_edit.css' %}" type="text/css">
+{% endblock %}
+{% block content %}
+     <main class="container-user">
+        <div class="profile">
+            <div class="data_container">
+                <form enctype='multipart/form-data' action="/user/{% if user.username %}{{ user.username }}{% else %}{{ user.email }}{% endif %}/edit" method="post">
+                {% csrf_token %}
+        <div class="avatar">
+            {% if user.image %}
+            <img src="{{ user.image.url }}" alt="">
+                {% else %}
+                 <img src="/media/default-user-image.png" alt="">
+            {% endif %}
+            <div class="image" style="margin-top: 7px">
+                <label class="label_default" for="image">New image:</label>
+                <span style="color: white" id="image">{{ form.image }}</span>
+            </div>
+            <div class="name">
+                <label class="label_default" for="email">Username:</label>
+                <span id="username">{{ form.username }}</span>
+            </div>
+        </div>
+        <div class="contact_info">
+            <div>
+            <label class="label_default" for="birth_date">Birth date:</label>
+            <div class="name birth_date">
+                <span id="birth_date">{{ form.birth_date }}</span>
+            </div>
+                </div>
+            <div>
+            <label class="label_default" for="city">Location:</label>
+            <div class="name city">
+                {{ form.city }}
+            </div>
+                </div>
+            <div>
+            <label class="label_default" for="gender">About:</label>
+            <div class="name gender">
+                {{ form.about }}
+            </div>
+                </div>
+            <div>
+                 <div class="gender_form">
+                    <label class="label_default" for="admin">Gender:</label>
+                    <div class="gender_form_inner" id="admin">{{ form.gender }}</div>
+                     <div class="button-submit">
+                    <button type="submit">Save changes</button>
+                </div>
+                </div>
+            </div>
+        </div>
+</form>
+    </div>
+        </div>
+     </main>
+{% endblock %}
